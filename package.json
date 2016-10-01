@@ -1,0 +1,26 @@
+{
+  "name": "jar-bot",
+  "version": "0.1.0",
+  "description": "A slack app designed to help teams air grievances in a healthy way",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://bitbucket.org/nickersona1211/jar-bot.git"
+  },
+  "keywords": [
+    "slack",
+    "bot",
+    "scrum",
+    "team",
+    "managment"
+  ],
+  "author": "Andrew Nickerson",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/nickersona1211/jar-bot#readme",
+  "dependencies": {
+    "node-config": "0.0.2"
+  }
+}
