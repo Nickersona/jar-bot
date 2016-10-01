@@ -40,6 +40,7 @@ controller.setupWebserver(port,function(err,webserver) {
 });
 
 controller.on('slash_command',function(bot,message) {
+  console.log(arguments)
   // reply to slash command
   bot.replyPublic(message,'Everyone can see the results of this slash command');
 
