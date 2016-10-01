@@ -4,9 +4,9 @@ var os = require('os');
 
 
 
-const clientSecret = config.Jar.slackAPI.clientSecret;
-const clientId = config.Jar.slackAPI.clientId;
-const port = config.Jar.port;
+const clientSecret = config.SLACK_CLIENT_SECRET;
+const clientId = config.SLACK_CLIENT_ID;
+const port = config.PORT;
 
 if (!clientSecret || !clientId || !port) {
   console.log('Error: Specify clientId clientSecret and port in environment');
