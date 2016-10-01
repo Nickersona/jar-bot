@@ -1,9 +1,10 @@
 module.exports = {
-  // Customer module configs
+  MY_HOST : 'test',
   Jar : {
+    port: 3000,
     slackAPI: {
       clientId: "86372351042.86357809904",
-      secret: "THIS SHOULD BE OVERRIDDEN BY ENV VARS"
+      clientSecret: ""
     },
     dbConfig: {
       host: "localhost",

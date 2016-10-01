@@ -21,6 +21,7 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/nickersona1211/jar-bot#readme",
   "dependencies": {
+    "botkit": "^0.2.2",
     "node-config": "0.0.2"
   }
 }
