@@ -1,4 +1,6 @@
 var config      = require('./lib/config-load')();
+var ActionDelegator      = require('./lib/action-delegator');
+var Jar      = require('./lib/jar');
 var Botkit = require('botkit');
 var os = require('os');
 
@@ -46,8 +48,43 @@ controller.setupWebserver(port,function(err,webserver) {
   });
 });
 
-controller.on('slash_command', function (bot, message) {
-    console.log('Here is the actual slash command used: ', message.command);
+const actionDelegator = ActionDelegator();
+const jar = Jar();
 
-    bot.replyPublic(message, '<@' + message.user + '> is cool!');
+const addCommand = function(bot, message, action) {
+  jar.add(action.content)
+  const jarIndex = jar.count();
+  bot.replyPrivate(message, `You put *'${action.content}'* in the jar. You can remove it by calling 
+    \`/jar remove ${jarIndex}\`, or see all items with \`/jar check\``);
+}
+
+actionDelegator.addAction('add', addCommand);
+actionDelegator.addAction('default', addCommand);
+
+actionDelegator.addAction('remove', function(bot, message) {
+
+});
+
+actionDelegator.addAction('empty', function(bot, message) {
+  bot.replyPrivate(message, `:boom: Clearing out the Jar :boom:`);
+  jar.empty();
+});
+
+actionDelegator.addAction('check', function(bot, message) {
+  const jarItems = jar.list();
+  var replyStr = `Jar's empty, things must be going pretty good!`
+
+  if(jarItems.length > 0) {
+    replyStr = `Here's what's in the jar: \n`
+    for(var item of jarItems) {
+      var idx = jarItems.indexOf(item) + 1;
+      replyStr += `${idx}) ${item} \n`;
+    }
+  }
+
+  bot.replyPrivate(message, replyStr);
+});
+
+controller.on('slash_command', function (bot, message) {
+  actionDelegator.delegate(bot, message);
 });
