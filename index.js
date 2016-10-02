@@ -9,6 +9,7 @@ const clientSecret = config.SLACK_CLIENT_SECRET;
 const clientId = config.SLACK_CLIENT_ID;
 const port = config.PORT;
 const host = config.HOST_URI;
+const slackToken = config.SLACK_TOKEN;
 
 if (!clientSecret || !clientId || !port) {
   console.log('Error: Specify clientId clientSecret and port in environment');
@@ -21,8 +22,14 @@ var controller = Botkit.slackbot({
     clientId: clientId,
     clientSecret: clientSecret,
     redirectUri: `https://${host}/oauth`,
-    scopes: ['commands']
+    scopes: ['commands', 'bot']
 });
+
+const bot = controller.spawn({
+    token: slackToken
+}).startRTM()
+
+
 
 // receive outgoing or slash commands
 // if you are already using Express, you can use your own server instance...
@@ -39,9 +46,8 @@ controller.setupWebserver(port,function(err,webserver) {
   });
 });
 
-controller.on('slash_command',function(bot,message) {
-  console.log(arguments)
-  // reply to slash command
-  bot.replyPublic(message,'Everyone can see the results of this slash command');
+controller.on('slash_command', function (bot, message) {
+    console.log('Here is the actual slash command used: ', message.command);
 
+    bot.replyPublic(message, '<@' + message.user + '> is cool!');
 });
