@@ -58,11 +58,37 @@ const addCommand = function(bot, message, action) {
     \`/jar remove ${jarIndex}\`, or see all items with \`/jar check\``);
 }
 
+const listAllJarItems = function(jarItems) {
+  var replyStr = '';
+  if(jarItems.length > 0) {
+    replyStr = `Here's what's in the jar: \n`
+    for(var item of jarItems) {
+      var idx = jarItems.indexOf(item) + 1;
+      replyStr += `${idx}) ${item} \n`;
+    }
+  } else {
+    replyStr = `Jar's empty, things must be going pretty good!`
+  }
+  return replyStr;
+}
+
 actionDelegator.addAction('add', addCommand);
 actionDelegator.addAction('default', addCommand);
 
-actionDelegator.addAction('remove', function(bot, message) {
+actionDelegator.addAction('remove', function(bot, message, action) {
+  const itemIdx = action.arguments[0] - 1; // Public facing indexes are 1 based
+  const item = jar.get(itemIdx);
+  const removeSuccess = jar.remove(itemIdx);
+  var replyStr = '';
 
+  if (removeSuccess) {
+    replyStr = `Took *'${item}'* out of the jar.`;
+  } else {
+    const jarItems = jar.get();
+    replyStr = `Whoops, I don't have that item. ${listAllJarItems(jarItems)}`;
+  }
+
+  bot.replyPrivate(message, replyStr);
 });
 
 actionDelegator.addAction('empty', function(bot, message) {
@@ -71,18 +97,8 @@ actionDelegator.addAction('empty', function(bot, message) {
 });
 
 actionDelegator.addAction('check', function(bot, message) {
-  const jarItems = jar.list();
-  var replyStr = `Jar's empty, things must be going pretty good!`
-
-  if(jarItems.length > 0) {
-    replyStr = `Here's what's in the jar: \n`
-    for(var item of jarItems) {
-      var idx = jarItems.indexOf(item) + 1;
-      replyStr += `${idx}) ${item} \n`;
-    }
-  }
-
-  bot.replyPrivate(message, replyStr);
+  const jarItems = jar.get();
+  bot.replyPrivate(message, listAllJarItems(jarItems));
 });
 
 controller.on('slash_command', function (bot, message) {
