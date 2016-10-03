@@ -55,23 +55,24 @@ const addCommand = function(bot, message, action) {
   jar.add(action.content)
   const jarIndex = jar.count();
   bot.replyPrivate(message, `You put *'${action.content}'* in the jar. You can remove it by calling 
-    \`/jar remove ${jarIndex}\`, or see all items with \`/jar check\``);
+    \`/jar remove (${jarIndex})\`, or see all items with \`/jar check\``);
 }
 
 const listAllJarItems = function(jarItems) {
   var replyStr = '';
   if(jarItems.length > 0) {
-    replyStr = `Here's what's in the jar: \n`
+    replyStr = `Here's what's I got: \n`
     for(var item of jarItems) {
       var idx = jarItems.indexOf(item) + 1;
       replyStr += `${idx}) ${item} \n`;
     }
   } else {
-    replyStr = `Jar's empty, things must be going pretty good!`
+    replyStr = `I got nothing, things must be going pretty good!`
   }
   return replyStr;
 }
 
+// Set the add command as the default action. So it'll be called with /jar
 actionDelegator.addAction('add', addCommand);
 actionDelegator.addAction('default', addCommand);
 
