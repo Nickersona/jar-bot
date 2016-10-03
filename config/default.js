@@ -5,4 +5,5 @@ module.exports = {
   SLACK_CLIENT_SECRET: "",
   HOST_URI: "localhost",
   SLACK_TOKEN: "",
+  MONGO_URI: "",
 }

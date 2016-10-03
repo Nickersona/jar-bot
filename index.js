@@ -1,37 +1,34 @@
 var config      = require('./lib/config-load')();
-var ActionDelegator      = require('./lib/action-delegator');
-var Jar      = require('./lib/jar');
 var Botkit = require('botkit');
+var BotkitStorageMongo = require('botkit-storage-mongo');
 var os = require('os');
 
-
+var ActionDelegator      = require('./lib/action-delegator');
+var Jar      = require('./lib/mongo-jar');
 
 
 const clientSecret = config.SLACK_CLIENT_SECRET;
 const clientId = config.SLACK_CLIENT_ID;
 const port = config.PORT;
 const host = config.HOST_URI;
-const slackToken = config.SLACK_TOKEN;
+const mongoUri = config.MONGO_URI;
 
 if (!clientSecret || !clientId || !port) {
   console.log('Error: Specify clientId clientSecret and port in environment');
   process.exit(1);
 }
+
+const mongoStorage = BotkitStorageMongo({ mongoUri: mongoUri });
+
 var controller = Botkit.slackbot({
   debug: true,
-  json_file_store: './db_slackbutton_slashcommand/',
+  storage: mongoStorage,
 }).configureSlackApp({
     clientId: clientId,
     clientSecret: clientSecret,
     redirectUri: `https://${host}/oauth`,
     scopes: ['commands', 'bot']
 });
-
-const bot = controller.spawn({
-    token: slackToken
-}).startRTM()
-
-
 
 // receive outgoing or slash commands
 // if you are already using Express, you can use your own server instance...
@@ -49,13 +46,19 @@ controller.setupWebserver(port,function(err,webserver) {
 });
 
 const actionDelegator = ActionDelegator();
-const jar = Jar();
+const jar = new Jar(controller);
+const generalErrStr = `We're having some technical difficulties, who knew a Jar would be so complicated`;
+
 
 const addCommand = function(bot, message, action) {
-  jar.add(action.content)
-  const jarIndex = jar.count();
-  bot.replyPrivate(message, `You put *'${action.content}'* in the jar. You can remove it by calling 
-    \`/jar remove (${jarIndex})\`, or see all items with \`/jar check\``);
+  jar.add(message, action.content).then(function(allItems){
+    const jarIndex = allItems.length
+    bot.replyPrivate(message, `You put *'${action.content}'* in the jar. You can remove it by calling 
+      \`/jar remove (${jarIndex})\`, or see all items with \`/jar check\``);
+  }).catch(function(err){
+    console.log(err);
+    bot.replyPrivate(message, generalErrStr);
+  });
 }
 
 const listAllJarItems = function(jarItems) {
@@ -64,7 +67,7 @@ const listAllJarItems = function(jarItems) {
     replyStr = `Here's what's I got: \n`
     for(var item of jarItems) {
       var idx = jarItems.indexOf(item) + 1;
-      replyStr += `${idx}) ${item} \n`;
+      replyStr += `*${idx})* ${item} \n`;
     }
   } else {
     replyStr = `I got nothing, things must be going pretty good!`
@@ -78,28 +81,33 @@ actionDelegator.addAction('default', addCommand);
 
 actionDelegator.addAction('remove', function(bot, message, action) {
   const itemIdx = action.arguments[0] - 1; // Public facing indexes are 1 based
-  const item = jar.get(itemIdx);
-  const removeSuccess = jar.remove(itemIdx);
-  var replyStr = '';
+  
+  jar.get(message).then(function(items){
+    jar.remove(message, itemIdx).then(function(removeSuccess){
+      var replyStr = '';
 
-  if (removeSuccess) {
-    replyStr = `Took *'${item}'* out of the jar.`;
-  } else {
-    const jarItems = jar.get();
-    replyStr = `Whoops, I don't have that item. ${listAllJarItems(jarItems)}`;
-  }
-
-  bot.replyPrivate(message, replyStr);
+      if (removeSuccess) {
+        replyStr = `Took *'${items[itemIdx]}'* out of the Jar.`;
+      } else {
+        replyStr = `Whoops, I don't have that item. ${listAllJarItems(items)}`;
+      }
+      bot.replyPrivate(message, replyStr);
+    });
+  });
 });
 
 actionDelegator.addAction('empty', function(bot, message) {
   bot.replyPrivate(message, `:boom: Clearing out the Jar :boom:`);
-  jar.empty();
+  jar.empty(message);
 });
 
 actionDelegator.addAction('check', function(bot, message) {
-  const jarItems = jar.get();
-  bot.replyPrivate(message, listAllJarItems(jarItems));
+  jar.get(message).then(function(jarItems){
+    bot.replyPrivate(message, listAllJarItems(jarItems));
+  }).catch( function(reason) {
+        console.log('Handle rejected promise ('+reason+') here.');
+        bot.replyPrivate(message, generalErrStr);
+  });
 });
 
 controller.on('slash_command', function (bot, message) {
