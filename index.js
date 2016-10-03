@@ -11,7 +11,7 @@ const clientSecret = config.SLACK_CLIENT_SECRET;
 const clientId = config.SLACK_CLIENT_ID;
 const port = config.PORT;
 const host = config.HOST_URI;
-const mongoUri = config.MONGO_URI;
+const mongoUri = config.MONGODB_URI;
 
 if (!clientSecret || !clientId || !port) {
   console.log('Error: Specify clientId clientSecret and port in environment');
