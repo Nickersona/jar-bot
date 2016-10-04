@@ -111,5 +111,6 @@ actionDelegator.addAction('check', function(bot, message) {
 });
 
 controller.on('slash_command', function (bot, message) {
+  console.log(message)
   actionDelegator.delegate(bot, message);
 });
