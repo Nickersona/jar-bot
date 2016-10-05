@@ -83,11 +83,12 @@ actionDelegator.addAction('remove', function(bot, message, action) {
   const itemIdx = action.arguments[0] - 1; // Public facing indexes are 1 based
   
   jar.get(message).then(function(items){
+    const removedItem = items[itemIdx]; // Setting this here because the remove method
+    // updates the items object in memory
     jar.remove(message, itemIdx).then(function(removeSuccess){
       var replyStr = '';
-
       if (removeSuccess) {
-        replyStr = `Took *'${items[itemIdx]}'* out of the Jar.`;
+        replyStr = `Took *'${removedItem}'* out of the Jar.`;
       } else {
         replyStr = `Whoops, I don't have that item. ${listAllJarItems(items)}`;
       }
