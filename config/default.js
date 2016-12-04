@@ -6,4 +6,5 @@ module.exports = {
   HOST_URI: "localhost",
   SLACK_TOKEN: "",
   MONGODB_URI: "mongodb://localhost:27017/",
+  DEBUG_MODE: false,
 }

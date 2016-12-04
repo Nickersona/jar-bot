@@ -12,6 +12,7 @@ const clientId = config.SLACK_CLIENT_ID;
 const port = config.PORT;
 const host = config.HOST_URI;
 const mongoUri = config.MONGODB_URI;
+const debugMode = config.DEBUG_MODE;
 
 if (!clientSecret || !clientId || !port) {
   console.log('Error: Specify clientId clientSecret and port in environment');
@@ -21,7 +22,7 @@ if (!clientSecret || !clientId || !port) {
 const mongoStorage = BotkitStorageMongo({ mongoUri: mongoUri });
 
 var controller = Botkit.slackbot({
-  debug: true,
+  debug: debugMode,
   storage: mongoStorage,
 }).configureSlackApp({
     clientId: clientId,
@@ -116,8 +117,8 @@ actionDelegator.addAction('check', function(bot, message) {
   jar.get(message).then(function(jarItems){
     bot.replyPrivate(message, listAllJarItems(jarItems));
   }).catch( function(reason) {
-        console.log('Handle rejected promise ('+reason+') here.');
-        bot.replyPrivate(message, strings.err.general);
+    console.log('Handle rejected promise ('+reason+') here.');
+    bot.replyPrivate(message, strings.err.general);
   });
 });
 
