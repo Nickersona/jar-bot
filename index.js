@@ -47,8 +47,13 @@ controller.setupWebserver(port,function(err,webserver) {
 
 const actionDelegator = ActionDelegator();
 const jar = new Jar(controller);
-const generalErrStr = `We're having some technical difficulties, who knew a Jar would be so complicated`;
 
+const strings = {
+  err: {
+    general: 'We\'re having some technical difficulties, who knew a Jar would be so complicated',
+    dupe: 'Looks like I\'ve already got that item.',
+  },
+}
 
 const addCommand = function(bot, message, action) {
   jar.add(message, action.content).then(function(allItems){
@@ -56,8 +61,13 @@ const addCommand = function(bot, message, action) {
     bot.replyPrivate(message, `You put *'${action.content}'* in the jar. You can remove it by calling 
       \`/jar remove (${jarIndex})\`, or see all items with \`/jar check\``);
   }).catch(function(err){
-    console.log(err);
-    bot.replyPrivate(message, generalErrStr);
+    switch(err.name) {
+    case 'DupeError':
+      bot.replyPrivate(message, strings.err.dupe);
+    default:
+      bot.replyPrivate(message, strings.err.general);
+      break;
+    }
   });
 }
 
@@ -107,7 +117,7 @@ actionDelegator.addAction('check', function(bot, message) {
     bot.replyPrivate(message, listAllJarItems(jarItems));
   }).catch( function(reason) {
         console.log('Handle rejected promise ('+reason+') here.');
-        bot.replyPrivate(message, generalErrStr);
+        bot.replyPrivate(message, strings.err.general);
   });
 });
 

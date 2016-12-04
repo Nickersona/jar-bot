@@ -25,6 +25,7 @@
   "dependencies": {
     "botkit": "^0.2.2",
     "botkit-storage-mongo": "^1.0.4",
+    "lodash": "^4.17.2",
     "node-config": "0.0.2"
   },
   "devDependencies": {
