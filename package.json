@@ -29,6 +29,6 @@
     "node-config": "0.0.2"
   },
   "devDependencies": {
-    "open": "0.0.5"
+    "open": "7.0.1"
   }
 }
